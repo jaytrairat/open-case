@@ -1,3 +1,8 @@
+# วิธีติดตั้ง
+```cmd
+go install github.com/jaytrairat/open-case@latest
+```
+
 # วิธีใช้งาน
 
 ใช้สำหรับเปิด Folder ใน NAS แบบง่าย ๆ
