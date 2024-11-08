@@ -54,10 +54,12 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			caseId := fmt.Sprintf("%03s", args[0])
 
-			targetPath := filepath.Join(basePath, year, fmt.Sprintf("F-%s-%s", year, caseId))
+			targetPath := filepath.Join(basePath, year)
+			if caseId != "dir" {
+				targetPath = filepath.Join(targetPath, fmt.Sprintf("F-%s-%s", year, caseId))
+			}
 
 			err := checkFolder(targetPath)
-			fmt.Println(targetPath)
 			if err != nil {
 				fmt.Printf("Error: %v\n", err)
 				return
