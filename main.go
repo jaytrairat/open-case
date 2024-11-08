@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -45,20 +46,15 @@ func checkFolder(folderPath string) error {
 
 func main() {
 	var year string
-	var caseID int
 
 	var rootCmd = &cobra.Command{
-		Use:   "openfolder",
+		Use:   "open-case [caseId]",
 		Short: "Open a case folder in the file explorer based on year and case",
+		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			if year == "" || caseID == 0 {
-				fmt.Println("Error: Both year (-y) and case (-c) must be provided.")
-				return
-			}
+			caseId := fmt.Sprintf("%03s", args[0])
 
-			caseIDStr := fmt.Sprintf("%03d", caseID)
-
-			targetPath := filepath.Join(basePath, year, fmt.Sprintf("F-%s-%s", year, caseIDStr))
+			targetPath := filepath.Join(basePath, year, fmt.Sprintf("F-%s-%s", year, caseId))
 
 			err := checkFolder(targetPath)
 			fmt.Println(targetPath)
@@ -67,7 +63,6 @@ func main() {
 				return
 			}
 
-			// Open the folder
 			err = openFolder(targetPath)
 			if err != nil {
 				fmt.Println("Error:", err)
@@ -77,8 +72,7 @@ func main() {
 		},
 	}
 
-	rootCmd.Flags().StringVarP(&year, "year", "y", "", "Year of the case (required)")
-	rootCmd.Flags().IntVarP(&caseID, "case", "c", 0, "Case ID (3-digit number) (required)")
+	rootCmd.Flags().StringVarP(&year, "year", "y", fmt.Sprintf("%d", time.Now().Year()), "Year of the case (required)")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
