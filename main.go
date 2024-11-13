@@ -6,12 +6,13 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 )
 
-const basePath = `\\192.168.9.10\Case Archive\Case-Forensic`
+var basePath = `\\192.168.9.10\Case Archive\Case-Forensic`
 
 func openFolder(folderPath string) error {
 	var cmd *exec.Cmd
@@ -46,6 +47,7 @@ func checkFolder(folderPath string) error {
 
 func main() {
 	var year string
+	var directory string
 
 	var rootCmd = &cobra.Command{
 		Use:   "open-case [caseId]",
@@ -54,7 +56,12 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			caseId := fmt.Sprintf("%03s", args[0])
 
+			if strings.TrimSpace(directory) == "onedrive" {
+				userHomePath, _ := os.UserHomeDir()
+				basePath = filepath.Join(userHomePath, "OneDrive", "Documents", "Forensic reports")
+			}
 			targetPath := filepath.Join(basePath, year)
+
 			if caseId != "dir" {
 				targetPath = filepath.Join(targetPath, fmt.Sprintf("F-%s-%s", year, caseId))
 			}
@@ -75,6 +82,7 @@ func main() {
 	}
 
 	rootCmd.Flags().StringVarP(&year, "year", "y", fmt.Sprintf("%d", time.Now().Year()), "Year of the case (required)")
+	rootCmd.Flags().StringVarP(&directory, "directory", "d", basePath, "Path of directory")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
