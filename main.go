@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -58,15 +59,26 @@ func main() {
 			caseId := fmt.Sprintf("%03s", args[0])
 
 			userHomePath, _ := os.UserHomeDir()
+			var targetPath string
 			if strings.TrimSpace(directory) == "onedrive" {
 				basePath = filepath.Join(userHomePath, "OneDrive", "Documents", "Forensic reports")
+				targetPath = filepath.Join(basePath, year)
+			} else if strings.TrimSpace(directory) == "network" {
+				thaiYear, _ := strconv.Atoi(year)
+				thaiYear += 543
+				thaiYearStr := fmt.Sprintf("%d", thaiYear)
+				thaiYearStr = thaiYearStr[2:]
+				targetPath = fmt.Sprintf("\\\\192.168.9.130\\dfu\\System DFU Evidence\\Case-%s", thaiYearStr)
 			} else if regexp.MustCompile(`^.$`).MatchString(directory) {
-				basePath = fmt.Sprintf("%s:\\cases", directory)
+				targetPath = fmt.Sprintf("%s:\\cases\\%s", directory, year)
+			} else {
+				targetPath = filepath.Join(basePath, year)
 			}
 
-			targetPath := filepath.Join(basePath, year)
-			if caseId != "dir" {
+			if strings.TrimSpace(directory) != "network" && caseId != "dir" {
 				targetPath = filepath.Join(targetPath, fmt.Sprintf("F-%s-%s", year, caseId))
+			} else if strings.TrimSpace(directory) == "network" {
+				targetPath = filepath.Join(targetPath, fmt.Sprintf("F%s", caseId))
 			}
 
 			err := checkFolder(targetPath)
@@ -84,8 +96,8 @@ func main() {
 		},
 	}
 
-	rootCmd.Flags().StringVarP(&year, "year", "y", fmt.Sprintf("%d", time.Now().Year()), "Year of the case (required)")
-	rootCmd.Flags().StringVarP(&directory, "directory", "d", basePath, "Path of directory")
+	rootCmd.Flags().StringVarP(&year, "year", "y", fmt.Sprintf("%d", time.Now().Year()), "Year of the case")
+	rootCmd.Flags().StringVarP(&directory, "directory", "d", basePath, "Type of directory [onedrive|network|drive]")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
