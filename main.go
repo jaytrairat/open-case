@@ -65,8 +65,6 @@ func main() {
 			}
 
 			targetPath := filepath.Join(basePath, year)
-
-			fmt.Println(targetPath, caseId)
 			if caseId != "dir" {
 				targetPath = filepath.Join(targetPath, fmt.Sprintf("F-%s-%s", year, caseId))
 			}
