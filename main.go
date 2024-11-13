@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -56,12 +57,16 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			caseId := fmt.Sprintf("%03s", args[0])
 
+			userHomePath, _ := os.UserHomeDir()
 			if strings.TrimSpace(directory) == "onedrive" {
-				userHomePath, _ := os.UserHomeDir()
 				basePath = filepath.Join(userHomePath, "OneDrive", "Documents", "Forensic reports")
+			} else if regexp.MustCompile(`^.$`).MatchString(directory) {
+				basePath = fmt.Sprintf("%s:\\cases", directory)
 			}
+
 			targetPath := filepath.Join(basePath, year)
 
+			fmt.Println(targetPath, caseId)
 			if caseId != "dir" {
 				targetPath = filepath.Join(targetPath, fmt.Sprintf("F-%s-%s", year, caseId))
 			}
